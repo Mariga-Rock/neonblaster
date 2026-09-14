@@ -12,20 +12,24 @@ API_KEY = os.environ.get("CF_IMAGE_API_KEY")
 if not WORKER_URL or not API_KEY:
     print("❌ Не заданы CF_WORKER_URL и/или CF_IMAGE_API_KEY")
     sys.exit(1)
-
+    
 # ============ ПРОМПТ ОБЛОЖКИ (16:9) ============
 COVER_PROMPT = (
-    "Mobile game cover art, wide 16:9 composition. A cute kawaii chibi "
-    "nurse girl face, blonde hair, white nurse cap with a pink cross, "
-    "big sparkling blue eyes, rosy blush, omega-shaped mouth, slightly "
-    "blushing and surprised. She is being hit by a big glowing pink heart "
-    "kiss that covers part of her cheek, small heart particles bursting "
-    "around. Background: bold radial gradient from hot pink to dark plum, "
-    "subtle glow. Thick black outlines, flat vibrant colors, glossy "
-    "highlights, drop shadow. Chunky vector style, polished mobile game "
-    "art, centered composition, high contrast. Empty clean space at the "
-    "top for a title. No text, no letters, no numbers, no logos, "
-    "no watermarks."
+    "Wide horizontal mobile game cover, playful kawaii "
+    "anime style, arcade love-shooter. Composition for 800x470 banner: "
+    "LEFT THIRD — cute cyan-blue boy hero in dynamic pose, blowing a "
+    "stream of glowing heart-shaped kisses from his lips, determined "
+    "smile. CENTER — curved trail of pink glowing hearts flying right "
+    "with motion streaks and sparkles. RIGHT TWO-THIRDS — group of three "
+    "cute chibi nurse girls in pink-and-white uniforms and nurse caps "
+    "with red crosses, blonde hair, big blue eyes, rosy cheeks, "
+    "cat \"ω\" mouths, surprised and charmed expressions, hearts floating "
+    "above their heads. Background: dark plum-magenta gradient "
+    "(#1a0510 → #3d0a24) with faint neon-pink grid, soft bokeh hearts, "
+    "glowing particles. Palette: hot pink #ff2e7e, soft pink #ff8fc0, "
+    "gold #ffd166, cyan #4cd4ff. BOTTOM-LEFT safe area for logo. Clean "
+    "vector-inspired illustration, thick outlines, high contrast, soft "
+    "rim light. No text."
 )
 
 # ============ ПРОМПТ ИКОНКИ (1:1, короткий) ============
@@ -75,24 +79,24 @@ def generate_image(prompt: str, width: int, height: int, out_path: str) -> bool:
 
 
 def make_cover():
-    raw = "cover_raw.jpg"
+    raw = "cover_raw1.jpg"
     if not generate_image(COVER_PROMPT, 1344, 768, raw):
         return False
     img = Image.open(raw).convert("RGB")
-    img = img.resize((1792, 1024), Image.LANCZOS)
-    img.save("cover_1792x1024.png", "PNG", optimize=True)
-    print("  ✅ Обложка: cover_1792x1024.png")
+    img = img.resize((800, 470), Image.LANCZOS)
+    img.save("cover_800x470.png", "PNG", optimize=True)
+    print("  ✅ Обложка: cover_800x470.png")
     return True
 
 
 def make_icon():
-    raw = "icon_raw.jpg"
+    raw = "icon_raw1.jpg"
     if not generate_image(ICON_PROMPT, 1024, 1024, raw):
         return False
     Image.open(raw).convert("RGB").resize(
         (512, 512), Image.LANCZOS
-    ).save("icon_512.png", "PNG", optimize=True)
-    print("  ✅ Иконка: icon_512.png")
+    ).save("icon_5122.png", "PNG", optimize=True)
+    print("  ✅ Иконка: icon_5122.png")
     return True
 
 
