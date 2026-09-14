@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-"""Генерация обложки и иконки через Cloudflare Workers AI."""
+"""Генерация обложки и иконки через Cloudflare Workers AI (flux-1-schnell)."""
 import os
 import sys
 import requests
 from PIL import Image
 
-# --- Конфигурация (берётся из переменных окружения) ---
 WORKER_URL = os.environ.get("CF_WORKER_URL")
 API_KEY = os.environ.get("CF_IMAGE_API_KEY")
-MODEL = "@cf/black-forest-labs/flux-1-schnell"
 
 if not WORKER_URL or not API_KEY:
     print("❌ Не заданы CF_WORKER_URL и/или CF_IMAGE_API_KEY")
-    print("   Выполните:")
-    print('   export CF_WORKER_URL="https://neonblaster-image-api.<ваш-субдомен>.workers.dev"')
-    print('   export CF_IMAGE_API_KEY="ваш-секрет"')
     sys.exit(1)
 
 COVER_PROMPT = (
@@ -38,15 +33,16 @@ ICON_PROMPT = (
 )
 
 
-def generate_image(prompt: str, width: int, height: int, out_path: str) -> bool:
+def generate_image(prompt: str, out_path: str) -> bool:
     """Отправляет запрос к Worker'у и сохраняет изображение."""
-    payload = {"prompt": prompt, "width": width, "height": height, "model": MODEL}
+    # ВАЖНО: передаём ТОЛЬКО prompt, без width и height
+    payload = {"prompt": prompt}
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
     }
 
-    print(f"→ Генерация {out_path} ({width}x{height})...")
+    print(f"→ Генерация {out_path}...")
     try:
         resp = requests.post(WORKER_URL, json=payload, headers=headers, timeout=300)
         resp.raise_for_status()
@@ -58,6 +54,11 @@ def generate_image(prompt: str, width: int, height: int, out_path: str) -> bool:
         print(f"  ❌ Ошибка запроса: {e}")
         return False
 
+    if len(resp.content) < 1000:
+        print(f"  ❌ Слишком маленький ответ ({len(resp.content)} байт)")
+        print(f"  Ответ: {resp.content[:300]}")
+        return False
+
     with open(out_path, "wb") as f:
         f.write(resp.content)
     print(f"  ✅ Сохранено: {out_path} ({len(resp.content)} байт)")
@@ -67,7 +68,7 @@ def generate_image(prompt: str, width: int, height: int, out_path: str) -> bool:
 def make_cover():
     """Обложка 16:9 → кроп/ресайз до 1792x1024."""
     raw = "cover_raw.jpg"
-    if not generate_image(COVER_PROMPT, 1024, 1024, raw):
+    if not generate_image(COVER_PROMPT, raw):
         return False
 
     img = Image.open(raw).convert("RGB")
@@ -92,7 +93,7 @@ def make_cover():
 def make_icon():
     """Иконка 1:1 → ресайз до 512x512."""
     raw = "icon_raw.jpg"
-    if not generate_image(ICON_PROMPT, 1024, 1024, raw):
+    if not generate_image(ICON_PROMPT, raw):
         return False
 
     img = Image.open(raw).convert("RGB")
