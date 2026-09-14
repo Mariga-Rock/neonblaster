@@ -13,26 +13,28 @@ if not WORKER_URL or not API_KEY:
     print("❌ Не заданы CF_WORKER_URL и/или CF_IMAGE_API_KEY")
     sys.exit(1)
 
-# ============ ПРОМПТ ОБЛОЖКИ ============
+# ============ ПРОМПТ ОБЛОЖКИ (16:9) ============
 COVER_PROMPT = (
-    "Mobile game cover art, wide 16:9 composition. Cute kawaii chibi nurse "
-    "girl with blonde hair, white nurse cap with pink cross, big blue eyes, "
-    "rosy blush, surprised expression. A big glowing pink heart kiss on her "
-    "cheek, small heart particles around. Hot pink to dark plum radial "
-    "gradient background, soft neon glow. Thick black outlines, flat vibrant "
-    "colors, glossy highlights, drop shadow. Chunky vector style, polished "
-    "mobile game art, centered composition. Empty space at the top for title. "
-    "No text, no letters, no logos, no watermarks."
+    "Mobile game cover art, wide 16:9 composition. A cute kawaii chibi "
+    "nurse girl face, blonde hair, white nurse cap with a pink cross, "
+    "big sparkling blue eyes, rosy blush, omega-shaped mouth, slightly "
+    "blushing and surprised. She is being hit by a big glowing pink heart "
+    "kiss that covers part of her cheek, small heart particles bursting "
+    "around. Background: bold radial gradient from hot pink to dark plum, "
+    "subtle glow. Thick black outlines, flat vibrant colors, glossy "
+    "highlights, drop shadow. Chunky vector style, polished mobile game "
+    "art, centered composition, high contrast. Empty clean space at the "
+    "top for a title. No text, no letters, no numbers, no logos, "
+    "no watermarks."
 )
 
-# ============ ПРОМПТ ИКОНКИ ============
+# ============ ПРОМПТ ИКОНКИ (1:1, короткий) ============
 ICON_PROMPT = (
-    "Mobile game icon, 1:1 square, minimal and bold. Glossy pink heart with "
-    "a small lips imprint, surrounded by sparkles and one cyan heart accent. "
-    "Deep plum-magenta radial gradient background, soft neon glow. "
-    "Thick dark outline, vibrant gradient fill, strong specular shine, "
-    "drop shadow. Chunky vector, kawaii arcade, high contrast, readable at "
-    "small sizes. No text, no letters, no logos, no watermarks."
+    "Kawaii chibi nurse girl face, blonde hair, white nurse cap with pink "
+    "cross, big blue eyes, rosy blush, surprised. A glowing pink heart kiss "
+    "on her cheek, small heart particles around. Hot pink to dark plum "
+    "gradient background. Thick outlines, flat vibrant colors, chunky vector "
+    "style, mobile game icon. No text, no logos."
 )
 
 
@@ -63,6 +65,7 @@ def generate_image(prompt: str, width: int, height: int, out_path: str) -> bool:
 
     if len(resp.content) < 1000:
         print(f"  ❌ Слишком маленький ответ ({len(resp.content)} байт)")
+        print(f"  Ответ: {resp.content[:300]}")
         return False
 
     with open(out_path, "wb") as f:
@@ -73,7 +76,6 @@ def generate_image(prompt: str, width: int, height: int, out_path: str) -> bool:
 
 def make_cover():
     raw = "cover_raw.jpg"
-    # SDXL любит кратное 8, 1344x768 — это 16:9
     if not generate_image(COVER_PROMPT, 1344, 768, raw):
         return False
     img = Image.open(raw).convert("RGB")
